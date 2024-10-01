@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فاتورة الحجز</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .invoice {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header img {
+            width: 150px;
+        }
+        h1 {
+            color: #34495e;
+            margin: 5px 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        h2 {
+            color: #2980b9;
+            margin: 10px 0;
+            font-size: 22px;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 5px;
+        }
+        .invoice-item {
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            background-color: #f9f9f9;
+        }
+        .label-ar {
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: right;
+            width: 30%;
+        }
+        .label-en {
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: left;
+            width: 30%;
+        }
+        .value {
+            color: black;
+            font-weight: normal;
+            text-align: center;
+            flex: 1;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 20px;
+            font-size: 18px;
+            color: white;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 45%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #ffffff;
+            }
+            .invoice {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                max-width: 100%;
+                page-break-inside: avoid;
+            }
+            button, footer {
+                display: none;
+            }
+            @page {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <div class="header">
+            <img src="path/to/logo.png" alt="شعار الموقع">
+            <h1>فاتورة الحجز</h1>
+            <h2>تفاصيل الحجز</h2>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">كود الحجز:</span>
+            <span class="value" id="bookingCode"></span>
+            <span class="label-en">:Booking Code</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">الاسم الأول:</span>
+            <span class="value" id="firstName"></span>
+            <span class="label-en">:First Name</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">اسم العائلة:</span>
+            <span class="value" id="lastName"></span>
+            <span class="label-en">:Last Name</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">تاريخ الحجز:</span>
+            <span class="value" id="bookingDate"></span>
+            <span class="label-en">:Booking Date</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">وقت الوصول:</span>
+            <span class="value" id="arrivalTime"></span>
+            <span class="label-en">:Arrival Time</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">وقت المغادرة:</span>
+            <span class="value" id="departureTime"></span>
+            <span class="label-en">:Departure Time</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">السعر:</span>
+            <span class="value" id="price"></span>
+            <span class="label-en">:Price</span>
+        </div>
+        <div class="invoice-item">
+            <span class="label-ar">ملاحظات:</span>
+            <span class="value" id="note"></span>
+            <span class="label-en">:Note</span>
+        </div>
+        <button id="printButton" onclick="printInvoice()">طباعة الفاتورة</button>
+        <button id="backButton" onclick="window.history.back()">عودة</button>
+    </div>
+    <footer>
+        &copy; 2024 جميع الحقوق محفوظة.
+    </footer>
+    <script>
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                bookingCode: params.get('bookingCode'),
+                firstName: params.get('firstName'),
+                lastName: params.get('lastName'),
+                bookingDate: params.get('bookingDate'),
+                arrivalTime: params.get('arrivalTime'),
+                departureTime: params.get('departureTime'),
+                price: params.get('price'),
+                note: params.get('note')
+            };
+        }
+
+        function convertTo12HourFormat(time) {
+            const [hour, minute] = time.split(':').map(Number);
+            const suffix = hour >= 12 ? 'م' : 'ص';
+            const adjustedHour = hour % 12 || 12; // تحويل الساعة 0 إلى 12
+            return `${adjustedHour}:${minute < 10 ? '0' + minute : minute} ${suffix}`;
+        }
+
+        function displayInvoice() {
+            const params = getQueryParams();
+            document.getElementById('bookingCode').textContent = params.bookingCode;
+            document.getElementById('firstName').textContent = params.firstName;
+            document.getElementById('lastName').textContent = params.lastName;
+            document.getElementById('bookingDate').textContent = params.bookingDate;
+            document.getElementById('arrivalTime').textContent = convertTo12HourFormat(params.arrivalTime);
+            document.getElementById('departureTime').textContent = convertTo12HourFormat(params.departureTime);
+            document.getElementById('price').textContent = params.price;
+            document.getElementById('note').textContent = params.note;
+        }
+
+        function printInvoice() {
+            window.print();
+        }
+
+        window.onload = displayInvoice;
+    </script>
+</body>
+</html>

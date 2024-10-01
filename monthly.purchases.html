@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشتريات الشهر</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        .month-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 18px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+        }
+        .purchases-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .purchases-table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #totalPrice {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>عرض مشتريات الشهر</h1>
+
+    <div class="month-selector">
+        <label for="monthSelect">اختر الشهر:</label>
+        <select id="monthSelect" onchange="displayPurchases()">
+            <option value="">جميع الأشهر</option>
+            <option value="1">يناير</option>
+            <option value="2">فبراير</option>
+            <option value="3">مارس</option>
+            <option value="4">أبريل</option>
+            <option value="5">مايو</option>
+            <option value="6">يونيو</option>
+            <option value="7">يوليو</option>
+            <option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+        <button onclick="displayPurchases()">عرض المشتريات</button>
+        <button id="printButton" onclick="printPurchases()" style="display:none;">طباعة</button>
+    </div>
+
+    <table class="purchases-table">
+        <thead>
+            <tr>
+                <th>عنوان الفاتورة</th>
+                <th>اسم العميل</th>
+                <th>تاريخ الفاتورة</th>
+                <th>إجمالي السعر</th>
+                <th>عرض التفاصيل</th>
+            </tr>
+        </thead>
+        <tbody id="purchasesTableBody">
+            <!-- سيتم عرض المشتريات هنا -->
+        </tbody>
+    </table>
+
+    <div id="totalPrice"></div>
+
+    <script>
+        function displayPurchases() {
+            const month = document.getElementById('monthSelect').value;
+            const purchasesTableBody = document.getElementById('purchasesTableBody');
+            purchasesTableBody.innerHTML = ''; // مسح المحتوى الحالي
+            let totalPrice = 0; // لحساب الإجمالي
+
+            // جلب فواتير المشتريات المحفوظة من LocalStorage
+            const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+
+            // تصفية الفواتير بناءً على الشهر المحدد
+            const filteredInvoices = purchaseInvoices.filter(invoice => {
+                const invoiceDate = new Date(invoice.invoiceDate);
+                return month === "" || invoiceDate.getMonth() + 1 == month; // التحقق من تطابق الشهر
+            });
+
+            // عرض المشتريات في الجدول
+            filteredInvoices.forEach(invoice => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${invoice.invoiceTitle}</td>
+                    <td>${invoice.clientName}</td>
+                    <td>${invoice.invoiceDate}</td>
+                    <td>${invoice.totalPrice} ريال</td>
+                    <td><button onclick="viewInvoice('${invoice.invoiceTitle}')">عرض</button></td>
+                `;
+                purchasesTableBody.appendChild(row);
+                totalPrice += parseFloat(invoice.totalPrice); // إضافة السعر إلى الإجمالي
+            });
+
+            // عرض الإجمالي
+            document.getElementById('totalPrice').innerText = `الإجمالي: ${totalPrice} ريال`;
+
+            // إذا لم توجد فواتير، عرض رسالة
+            if (filteredInvoices.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5">لا توجد مشتريات لهذا الشهر.</td>`;
+                purchasesTableBody.appendChild(row);
+            } else {
+                document.getElementById('printButton').style.display = 'block'; // إظهار زر الطباعة
+            }
+        }
+
+        function viewInvoice(invoiceTitle) {
+            window.location.href = `invoice.html?invoiceTitle=${invoiceTitle}`;
+        }
+
+        function printPurchases() {
+            // إخفاء الأزرار
+            document.querySelector('.month-selector').style.display = 'none';
+            const printContents = document.body.innerHTML;
+            const printWindow = window.open('', '', 'width=800,height=600');
+            printWindow.document.write(`<html><head><title>طباعة المشتريات</title></head><body>${printContents}</body></html>`);
+            printWindow.document.close();
+            printWindow.print();
+            printWindow.close();
+        }
+    </script>
+
+</body>
+</html>

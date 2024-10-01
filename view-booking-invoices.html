@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض فواتير الحجز</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%; /* جعل العرض 100% */
+            max-width: 100%; /* التأكد من أن العرض لا يتجاوز 100% */
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        button {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 600px) {
+            th, td {
+                font-size: 14px; /* تعديل حجم الخط للأجهزة الصغيرة */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>عرض فواتير الحجز</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>اسم العائلة</th>
+                <th>كود الحجز</th>
+                <th>وقت الوصول</th>
+                <th>وقت المغادرة</th>
+                <th>السعر</th>
+                <th>ملاحظات</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="invoiceTableBody">
+            <!-- سيتم إضافة بيانات الفواتير هنا -->
+        </tbody>
+    </table>
+    <button onclick="window.location.href='booking-invoice.html'">إنشاء حجز جديد</button>
+
+    <script>
+        function displayInvoices() {
+            const invoices = JSON.parse(localStorage.getItem('bookingInvoices')) || [];
+            const tableBody = document.getElementById('invoiceTableBody');
+
+            invoices.forEach((invoice, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${invoice.firstName}</td>
+                    <td>${invoice.lastName}</td>
+                    <td>${invoice.bookingCode}</td>
+                    <td>${invoice.arrivalTime}</td>
+                    <td>${invoice.departureTime}</td>
+                    <td>${invoice.price}</td>
+                    <td>${invoice.note}</td>
+                    <td>
+                        <button onclick="viewInvoice(${index})">عرض</button>
+                        <button onclick="deleteInvoice(${index})">حذف</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function viewInvoice(index) {
+            const invoices = JSON.parse(localStorage.getItem('bookingInvoices')) || [];
+            const invoice = invoices[index];
+            if (invoice) {
+                const queryParams = new URLSearchParams({
+                    bookingCode: invoice.bookingCode,
+                    firstName: invoice.firstName,
+                    lastName: invoice.lastName,
+                    bookingDate: invoice.bookingDate,
+                    arrivalTime: invoice.arrivalTime,
+                    departureTime: invoice.departureTime,
+                    price: invoice.price,
+                    note: invoice.note
+                });
+                window.location.href = `booking-invoice.html?${queryParams.toString()}`; // توجيه إلى صفحة عرض الفاتورة
+            }
+        }
+
+        function deleteInvoice(index) {
+            const invoices = JSON.parse(localStorage.getItem('bookingInvoices')) || [];
+            invoices.splice(index, 1);
+            localStorage.setItem('bookingInvoices', JSON.stringify(invoices));
+            location.reload(); // تحديث الصفحة
+        }
+
+        window.onload = displayInvoices; // عرض الفواتير عند تحميل الصفحة
+    </script>
+</body>
+</html>

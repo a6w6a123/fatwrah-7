@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء فاتورة مشتريات</title>
+    <link rel="stylesheet" href="styles.css"> <!-- تأكد من وجود هذا الملف -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: right; /* للمحاذاة مع الاتجاه من اليمين لليسار */
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* لتضمن أن البادينج لا يؤثر على الحجم الكلي */
+        }
+        .product {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .remove-product {
+            background-color: #f44336;
+            margin-left: 10px;
+        }
+        .remove-product:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>إنشاء فاتورة مشتريات</h1>
+        <div class="form-group">
+            <label for="clientName">اسم العميل:</label>
+            <input type="text" id="clientName" required>
+        </div>
+        <div class="form-group">
+            <label for="invoiceDate">تاريخ الفاتورة:</label>
+            <input type="date" id="invoiceDate" required>
+        </div>
+        <div class="form-group">
+            <label for="invoiceDueDate">تاريخ استحقاق الفاتورة:</label>
+            <input type="date" id="invoiceDueDate" required>
+        </div>
+
+        <h2>المنتجات</h2>
+        <div id="productList"></div>
+        <button class="button" onclick="addProduct()">إضافة منتج</button>
+
+        <h3>الإجمالي: <span id="totalAmount">0</span> ريال</h3>
+        <button class="button" onclick="saveInvoice()">حفظ الفاتورة</button>
+    </div>
+
+    <script>
+        let total = 0;
+
+        function addProduct() {
+            const productContainer = document.createElement('div');
+            productContainer.className = 'product';
+            productContainer.innerHTML = `
+                <div class="form-group">
+                    <label for="productName">اسم المنتج:</label>
+                    <input type="text" class="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">السعر:</label>
+                    <input type="number" class="productPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="productNote">ملاحظة:</label>
+                    <textarea class="productNote" rows="2" placeholder="أضف ملاحظة هنا..."></textarea>
+                </div>
+                <button class="button remove-product" onclick="removeProduct(this)">حذف المنتج</button>
+            `;
+            document.getElementById('productList').appendChild(productContainer);
+        }
+
+        function removeProduct(button) {
+            const productContainer = button.parentElement;
+            productContainer.remove();
+            calculateTotal();
+        }
+
+        function saveInvoice() {
+            const clientName = document.getElementById('clientName').value;
+            const invoiceDate = document.getElementById('invoiceDate').value;
+            const invoiceDueDate = document.getElementById('invoiceDueDate').value;
+
+            const products = Array.from(document.querySelectorAll('.product')).map(product => {
+                const name = product.querySelector('.productName').value;
+                const price = parseFloat(product.querySelector('.productPrice').value) || 0;
+                const note = product.querySelector('.productNote').value;
+                return { name, price, note };
+            });
+
+            const invoiceData = {
+                clientName,
+                invoiceDate,
+                invoiceDueDate,
+                products,
+                total
+            };
+
+            console.log("تم حفظ الفاتورة:", invoiceData);
+            alert("تم حفظ الفاتورة بنجاح!");
+        }
+
+        function calculateTotal() {
+            total = 0;
+            const prices = document.querySelectorAll('.productPrice');
+            prices.forEach(price => {
+                total += parseFloat(price.value) || 0;
+            });
+            document.getElementById('totalAmount').textContent = total;
+        }
+
+        document.addEventListener('input', calculateTotal);
+    </script>
+
+</body>
+</html>

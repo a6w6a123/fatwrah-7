@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الفاتورة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        .invoice-details {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-details label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .invoice-details p {
+            margin: 0 0 15px 0;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .products-table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>تفاصيل الفاتورة</h1>
+
+    <div class="invoice-details">
+        <label>عنوان الفاتورة:</label>
+        <p id="invoiceTitle"></p>
+
+        <label>اسم العميل:</label>
+        <p id="clientName"></p>
+
+        <label>تاريخ الفاتورة:</label>
+        <p id="invoiceDate"></p>
+
+        <label>تاريخ انتهاء الفاتورة:</label>
+        <p id="endDate"></p>
+
+        <h3>المنتجات</h3>
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>اسم المنتج</th>
+                    <th>السعر</th>
+                    <th>ملاحظة</th>
+                </tr>
+            </thead>
+            <tbody id="productsTableBody">
+                <!-- سيتم عرض المنتجات هنا -->
+            </tbody>
+        </table>
+
+        <label>إجمالي السعر:</label>
+        <p id="totalPrice"></p>
+
+        <button id="printButton" onclick="printInvoice()">طباعة الفاتورة</button>
+    </div>
+
+    <script>
+        // استرداد بيانات الفاتورة عند تحميل الصفحة
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const invoiceTitle = urlParams.get('invoiceTitle');
+
+            // جلب الفواتير المحفوظة من LocalStorage
+            const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+
+            // البحث عن الفاتورة حسب العنوان
+            const invoice = purchaseInvoices.find(inv => inv.invoiceTitle === invoiceTitle);
+
+            if (invoice) {
+                // عرض بيانات الفاتورة
+                document.getElementById('invoiceTitle').innerText = invoice.invoiceTitle;
+                document.getElementById('clientName').innerText = invoice.clientName;
+                document.getElementById('invoiceDate').innerText = invoice.invoiceDate;
+                document.getElementById('endDate').innerText = invoice.endDate;
+
+                // عرض تفاصيل المنتجات
+                const productsTableBody = document.getElementById('productsTableBody');
+                let total = 0; // متغير لحساب المجموع
+                invoice.products.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.productName}</td>
+                        <td>${product.price} ريال</td>
+                        <td>${product.note}</td>
+                    `;
+                    productsTableBody.appendChild(row);
+
+                    // إضافة السعر إلى المجموع
+                    total += parseFloat(product.price);
+                });
+
+                // عرض إجمالي السعر
+                document.getElementById('totalPrice').innerText = `${total} ريال`;
+            } else {
+                alert('لم يتم العثور على الفاتورة');
+            }
+        };
+
+        // وظيفة لطباعة الفاتورة وإخفاء زر الطباعة مؤقتًا
+        function printInvoice() {
+            const printButton = document.getElementById('printButton');
+            // إخفاء الزر
+            printButton.style.display = 'none';
+
+            // طباعة الصفحة
+            window.print();
+
+            // إعادة إظهار الزر بعد الطباعة
+            printButton.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>

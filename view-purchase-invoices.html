@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض فواتير المشتريات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>عرض فواتير المشتريات</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>رقم الفاتورة</th>
+                <th>اسم العميل</th>
+                <th>عنوان الفاتورة</th>
+                <th>تاريخ الفاتورة</th>
+                <th>إجمالي السعر</th>
+                <th>عرض</th>
+                <th>حذف</th>
+            </tr>
+        </thead>
+        <tbody id="invoiceTableBody">
+            <!-- سيتم ملء البيانات هنا -->
+        </tbody>
+    </table>
+
+    <script>
+        // دالة لتحميل الفواتير من التخزين المحلي وعرضها في الجدول
+        function loadPurchaseInvoices() {
+            const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+            const tableBody = document.getElementById('invoiceTableBody');
+            tableBody.innerHTML = ''; // مسح المحتوى الحالي
+
+            purchaseInvoices.forEach((invoice, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${invoice.clientName}</td>
+                    <td>${invoice.invoiceTitle}</td>
+                    <td>${invoice.startDate}</td>
+                    <td>${invoice.totalPrice} ريال</td>
+                    <td><button onclick="viewInvoice(${index})">عرض</button></td>
+                    <td><button onclick="deleteInvoice(${index})">حذف</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // دالة لعرض تفاصيل الفاتورة
+        function viewInvoice(index) {
+            const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+            const invoice = purchaseInvoices[index];
+            if (invoice) {
+                // إعادة التوجيه إلى صفحة عرض الفاتورة
+                window.location.href = `invoice.html?invoiceIndex=${index}`;
+            }
+        }
+
+        // دالة لحذف الفاتورة
+        function deleteInvoice(index) {
+            let purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+            if (confirm("هل أنت متأكد من أنك تريد حذف هذه الفاتورة؟")) {
+                purchaseInvoices.splice(index, 1);
+                localStorage.setItem('purchaseInvoices', JSON.stringify(purchaseInvoices));
+                loadPurchaseInvoices(); // إعادة تحميل الفواتير بعد الحذف
+            }
+        }
+
+        // استدعاء دالة تحميل الفواتير عند تحميل الصفحة
+        window.onload = loadPurchaseInvoices;
+    </script>
+</body>
+</html>

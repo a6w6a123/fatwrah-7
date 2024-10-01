@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الصفحة الرئيسية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .stats {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #333;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>منصة إدارة الفواتير</h1>
+    <button onclick="window.location.href='create-purchase-invoice.html'">إنشاء فاتورة مشتريات</button>
+    <button onclick="window.location.href='create-booking-invoice.html'">إنشاء فاتورة حجز</button>
+    <button onclick="window.location.href='view-purchase-invoices.html'">عرض فواتير المشتريات</button>
+    <button onclick="window.location.href='view-booking-invoices.html'">عرض فواتير الحجوزات</button>
+
+    <div class="stats">
+        <h2>إحصائيات المشتريات</h2>
+        <label for="monthSelect">اختر الشهر:</label>
+        <select id="monthSelect" onchange="calculateTotalPurchases()">
+            <option value="">اختر شهراً</option>
+            <option value="1">يناير</option>
+            <option value="2">فبراير</option>
+            <option value="3">مارس</option>
+            <option value="4">أبريل</option>
+            <option value="5">مايو</option>
+            <option value="6">يونيو</option>
+            <option value="7">يوليو</option>
+            <option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+        <p id="totalPurchases">إجمالي المشتريات: 0 ريال</p>
+    </div>
+
+    <script>
+        // دالة لحساب إجمالي المشتريات بناءً على الشهر المحدد
+        function calculateTotalPurchases() {
+            const purchaseInvoices = JSON.parse(localStorage.getItem('purchaseInvoices')) || [];
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            let total = 0;
+
+            purchaseInvoices.forEach(invoice => {
+                const invoiceDate = new Date(invoice.date); // افترض أن تاريخ الفاتورة موجود
+                if (selectedMonth && invoiceDate.getMonth() + 1 === selectedMonth) { // تحقق من تطابق الشهر
+                    total += invoice.totalPrice; // جمع الأسعار
+                }
+            });
+
+            document.getElementById('totalPurchases').innerText = `إجمالي المشتريات: ${total} ريال`;
+        }
+
+        // استدعاء دالة حساب إجمالي المشتريات عند تحميل الصفحة
+        window.onload = calculateTotalPurchases;
+    </script>
+</body>
+</html>
+ا
